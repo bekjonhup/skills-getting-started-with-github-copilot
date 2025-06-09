@@ -1,0 +1,43 @@
+import telebot
+import random
+
+# Bu yerga o'zingizning bot tokeningizni yozing
+TOKEN = '7939172325:AAG-qdI_R7jWaE0wrYsLDs3WuGgz0ZJeXrs'
+bot = telebot.TeleBot(TOKEN)
+
+# O'yin variantlari
+options = ['Tosh', 'Qaychi', 'Qog\'oz']
+
+# Boshlash
+@bot.message_handler(commands=['start'])
+def start_game(message):
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.row('Tosh', 'Qaychi', 'Qog\'oz')
+    bot.send_message(message.chat.id, "O'yinga xush kelibsiz! Tanlang:", reply_markup=markup)
+
+# Foydalanuvchi tanlovi
+@bot.message_handler(func=lambda message: message.text in options)
+def handle_choice(message):
+    user_choice = message.text
+    bot_choice = random.choice(options)
+
+    # Natijani aniqlash
+    if user_choice == bot_choice:
+        result = "Durrang!"
+    elif (user_choice == 'Tosh' and bot_choice == 'Qaychi') or \
+         (user_choice == 'Qaychi' and bot_choice == 'Qog\'oz') or \
+         (user_choice == 'Qog\'oz' and bot_choice == 'Tosh'):
+        result = "Siz yutdingiz! 🎉"
+    else:
+        result = "Bot yutdi! 😜"
+
+    response = f"Siz: {user_choice}\nBot: {bot_choice}\n\n{result}"
+    bot.send_message(message.chat.id, response)
+
+# Noto‘g‘ri buyruq
+@bot.message_handler(func=lambda message: True)
+def fallback(message):
+    bot.send_message(message.chat.id, "Iltimos, faqat Tosh, Qaychi yoki Qog'oz ni tanlang.")
+
+# Botni ishga tushirish
+bot.polling()
